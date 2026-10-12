@@ -14,6 +14,26 @@ local function ChatColorToTextColor(cflag)
 	return cflag and string.char(((cflag - V_MAGENTAMAP) >> 12) + 129) or "\x80"
 end
 
+local function LatencyToColor(player)
+	-- Special cases
+	if (player == server) then
+		return V_AQUAMAP
+	elseif (player.bot) then
+		return V_ORANGEMAP
+	elseif (player.quittime) then
+		return V_INVERTMAP
+	end
+	
+	local ping = player.ping
+	if (ping < 128) then
+		return V_GREENMAP
+	elseif (ping < 256) then
+		return V_YELLOWMAP
+	else
+		return V_REDMAP
+	end
+end
+
 local function RenderPlayer(v, ypos, player, team) -- standard
 	local spectator = team.spectator
 	local textcolor = 0 --skincolors[teamcolor].chatcolor
@@ -61,12 +81,14 @@ local function RenderPlayer(v, ypos, player, team) -- standard
 	end
 
 	local latencytext = player.ping .. "ms"
-	if (player == server) then
+	if (player.bot) then
+		latencytext = "Bot"
+	elseif (player == server) then
 		latencytext = "Host"
 	elseif (player.quittime > 0) then
 		latencytext = "D/C"
 	end
-	DrawString(BASEVIDWIDTH - (2 + 8), ypos + textspos, latencytext, V_ALLOWLOWERCASE|textcolor, "small-right")
+	DrawString(BASEVIDWIDTH - (2 + 8), ypos + textspos, latencytext, V_ALLOWLOWERCASE|LatencyToColor(player), "small-right")
 	return 16
 end
 
