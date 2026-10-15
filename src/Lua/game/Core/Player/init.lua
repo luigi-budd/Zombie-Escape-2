@@ -4,8 +4,6 @@ local function dopath(_path)
 	dofile(PATH .. "/" .. _path)
 end
 
-dopath("shop.lua")
-
 dopath("pregame.lua")
 
 dopath("replacealpha.lua")
@@ -29,6 +27,7 @@ dopath("Movement/jumpfatigue.lua")
 dopath("Movement/sourcephys.lua")
 dopath("Movement/misc.lua")
 
+dopath("Health/falldamage.lua")
 dopath("Health/hurt.lua")
 dopath("Health/damageindicator.lua")
 
