@@ -28,7 +28,7 @@ local function roundinfo(v,p,me,ze)
 	
 	if game.releasetime then
 		v.draw(160-(topwidth/2), 12, topzomb, V_SNAPTOTOP)
-		v.drawString(160, 15, (game.releasetime/TICRATE) + 1, V_ORANGEMAP|V_SNAPTOTOP, "thin-center")
+		v.drawString(160, 15, game.releasetime/TICRATE, V_ORANGEMAP|V_SNAPTOTOP, "thin-center")
 	end
 
 	if multiplayer then
@@ -58,7 +58,7 @@ local function eventtimers(v,p,me,ze)
 
 	for i,timer in ipairs(ZE2:GetActiveTimers()) do
 		local name = "* " .. (timer.text or ("Event " .. i))
-		local time = "  " .. (G_TicsToMTIME(timer.time)+1) .. ""
+		local time = "  " .. G_TicsToMTIME(timer.time) .. ""
 		local color = timer.textcolor or SKINCOLOR_TEAL
 
 		customhud.CustomFontString(v, x, y, name, "TNYFC",

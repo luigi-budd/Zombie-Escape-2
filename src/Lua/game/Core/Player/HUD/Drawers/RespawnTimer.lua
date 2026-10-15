@@ -9,7 +9,7 @@ return "RespawnTimer", function(v, player)
 
 	if player.playerstate == PST_DEAD and not player.spectator then
 		local respawntics = player.ze2.respawntics
-		local respawntics2 = string.format("%d"..".".."%.2d", G_TicsToSeconds(respawntics), G_TicsToCentiseconds(respawntics))
+		local respawntics2 = G_TicsToSeconds(respawntics) .. "." .. G_TicsToCentiseconds(respawntics)
 		local text = "Respawning in:"
 
 		if player.ze2.outofgame then
