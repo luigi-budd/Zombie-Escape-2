@@ -21,9 +21,17 @@ local function HandleFalldamage(player)
         player.ze2.fall_height = player.mo.z
     end
 
+    if (player.mo.momz > 0) then
+        player.ze2.isFalling = false
+        return
+    end
+
     if not P_IsObjectOnGround(player.mo) then return end
 
     player.ze2.isFalling = false
+	if (player.mo.eflags & MFE_TOUCHWATER) or (player.mo.eflags & MFE_UNDERWATER) then
+		return
+	end
 
     local fall_distance = (player.ze2.fall_height - player.mo.z)
     if (fall_distance <= ZE2.MIN_FALL_DISTANCE) then return end
