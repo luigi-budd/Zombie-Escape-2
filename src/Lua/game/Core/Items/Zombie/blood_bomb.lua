@@ -43,7 +43,7 @@ states[S_BLOODBOMB_DEATH] = {SPR_NULL, A, 1, function(mo) -- Explode within a ra
 
 	P_StartQuake(64 * FU, TICRATE, {x = mo.x, y = mo.y, z = mo.z})
 
-	A_OldRingExplode(mo, MT_DUST, 0) -- TODO: Change it to blood particles instead...? maybe adapt blood droplets for this.
+	ZE2.DoDroplet(mo, 32)
 end, 0, 0, S_NULL}
 
 -- Register it
@@ -109,7 +109,7 @@ xSlinger.registerItem("blood_bomb", {
 	usefunc = function(self, mo)
 		if not mo and mo.valid then return end
 
-		P_DamageMobj(mo, nil, nil, health_cost, 0) -- Heh don't use this as a survivor lol
+		P_DamageMobj(mo, nil, nil, health_cost, ZE2.DMG_BLOODBOMB) -- Heh don't use this as a survivor lol
 	end,
 	missile_tick = function(self, mo, missile) -- Code of infection vfx.
 		if (leveltime % 3 == 0) then return end

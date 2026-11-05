@@ -94,13 +94,22 @@ function ZE2.drawCrosshairGuide(mobj, id, alpha, ticfunc, startfunc)
 				if not (shot and shot.valid) then
 					break
 				end
+
+				local moving = true
+				if (shot.z == shot.floorz) or ((shot.z + shot.height) == shot.ceilingz) then
+					moving = false
+				end
+
+				if (x == shot.x) and (y == shot.y) and (z == shot.z) then
+					moving = false
+				end
 				
 				x = shot.x
 				y = shot.y
 				z = shot.z
 				valid = true
 				
-				if (shot.z == shot.floorz) or (shot.z + shot.height) == shot.ceilingz then
+				if not moving then
 					shot.momx = 0
 					shot.momy = 0
 					shot.momz = 0
@@ -162,10 +171,12 @@ SurvivorItem "volt_ring.lua"
 -- Misc
 SurvivorItem "blue_spring.lua"
 SurvivorItem "wood_fence.lua"
+SurvivorItem "steel_fence.lua" -- must load after wood fence
 SurvivorItem "apple.lua"
 SurvivorItem "energy_drink.lua"
 SurvivorItem "amys_heart.lua"
 SurvivorItem "auto_turret.lua"
+SurvivorItem "laser_mine.lua"
 
 ZombieItem "insta_burst.lua"
 ZombieItem "fist.lua"

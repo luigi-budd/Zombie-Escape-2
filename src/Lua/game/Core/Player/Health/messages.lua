@@ -51,7 +51,8 @@ local function GetSourceNameWithInflictor(source, inflictor)
 end
 
 local DEATH_TYPES = {
-	[6] = "%s%s%s hit the ground too hard",  -- DMG_FALLDAMAGE
+	[ZE2.DMG_BLOODBOMB] = "%s%s%s ran out of blood",
+	[ZE2.DMG_FALLDAMAGE] = "%s%s%s hit the ground too hard",
 	[DMG_WATER] = "%s%s%s dissolved in chemicals",
 	[DMG_FIRE] = "%s%s%s burned into ashes",
 	[DMG_ELECTRIC] = "%s%s%s electrocuted",
@@ -60,7 +61,10 @@ local DEATH_TYPES = {
 	[DMG_DROWNED] = "%s%s%s drowned",
 	[DMG_SPACEDROWN] = "%s%s%s couldn't breathe",
 	[DMG_DEATHPIT] = "%s%s%s fell into a bottomless pit",
-	[DMG_CRUSHED] = "%s%s%s was crushed"
+	[DMG_CRUSHED] = "%s%s%s was crushed",
+
+	[DMG_SPECTATOR] = "%s%s%s went AWOL",
+	[DMG_INSTAKILL] = "%s%s%s has been killed by " .. "\x8F" .. "Something"
 }
 
 ---@param assist mobj_t
@@ -95,12 +99,34 @@ function ZE2.SendDeathMessage(player, inflictor, source, damagetype)
 				message = string.format("%s%s while trying to escape %s%s", oldmessage, "\x83", sourcecolor, sourcename)
 			end
 		elseif source and source.player then
-			local sourcecolor, sourcename = GetSourceNameWithInflictor(source, inflictor)
-			message = string.format("%s%s%s has been killed by %s%s", playercolor, player.name, "\x83", sourcecolor, sourcename)
-			if ValidAssist(assist) then
-				local sourcecolor, sourcename = ZE2.GetMobjNameAndColor(assist)
-				local oldmessage = message
-				message = string.format("%s%s with help from %s%s", oldmessage, "\x83", sourcecolor, sourcename)
+			if (source.player == player) then
+				message = string.format("%s%s%s has commited suicide", playercolor, player.name, "\x83")
+				if inflictor and inflictor.valid and ((inflictor ~= source) or (inflictor.target and inflictor.target.valid and not (inflictor.flags & (MF_BOSS|MF_ENEMY)))) then
+					local theircolor, theirname = ZE2.GetMobjNameAndColor(inflictor)
+					if (theirname:len() > 0) then -- valid name
+						local oldmessage = message
+						message = string.format("%s%s with their own %s%s", oldmessage, "\x83", theircolor, theirname)
+					end
+				end
+
+				if ValidAssist(assist) then
+					local sourcecolor, sourcename = ZE2.GetMobjNameAndColor(assist)
+					local oldmessage = message
+					message = string.format("%s%s while trying to escape %s%s", oldmessage, "\x83", sourcecolor, sourcename)
+				end
+			else
+				local placeholder = "%s%s%s has been killed by %s%s"
+				if (source.team == player.mo.team) then
+					 placeholder = "%s%s%s has been betrayed by %s%s"
+				end
+
+				local sourcecolor, sourcename = GetSourceNameWithInflictor(source, inflictor)
+				message = string.format(placeholder, playercolor, player.name, "\x83", sourcecolor, sourcename)
+				if ValidAssist(assist) then
+					local sourcecolor, sourcename = ZE2.GetMobjNameAndColor(assist)
+					local oldmessage = message
+					message = string.format("%s%s with help from %s%s", oldmessage, "\x83", sourcecolor, sourcename)
+				end
 			end
 		elseif source.info and source.info.npc_name then
 			local sourcecolor, sourcename = GetSourceNameWithInflictor(source, inflictor)
@@ -125,6 +151,10 @@ function ZE2.SendDeathMessage(player, inflictor, source, damagetype)
 			end
 		end
 	elseif DEATH_TYPES[damagetype] then
+		if player.spectator then
+			damagetype = DMG_SPECTATOR
+		end
+
 		message = string.format(DEATH_TYPES[damagetype], playercolor, player.name, "\x83")
 		if ValidAssist(assist) then
 			local sourcecolor, sourcename = ZE2.GetMobjNameAndColor(assist)
@@ -157,14 +187,25 @@ function ZE2.SendInfectionMessage(player, inflictor, source)
 	local message = ""
 	local playercolor = "\x84"
 	if source and source.valid and source.player and source.player.valid then
-		local sourcecolor, sourcename = ZE2.GetMobjNameAndColor(source)
-		if inflictor and inflictor.valid and ((inflictor ~= source) or (inflictor.target and inflictor.target.valid)) then
-			local theircolor, theirname = ZE2.GetMobjNameAndColor(inflictor)
-			if (theirname:len() > 0) then -- valid name
-				sourcename = sourcecolor .. sourcename .. "\x83" .. "'s " .. theircolor .. theirname
+		if (source.player == player) then -- this is imposible to get but, would be funny
+			message = string.format("%s%s%s has been infected by themselves", playercolor, player.name, "\x83")
+			if inflictor and inflictor.valid and ((inflictor ~= source) or (inflictor.target and inflictor.target.valid)) then
+				local theircolor, theirname = ZE2.GetMobjNameAndColor(inflictor)
+				if (theirname:len() > 0) then -- valid name
+					local oldmessage = message
+					message = string.format("%s%s with their own %s%s", oldmessage, "\x83", theircolor, theirname)
+				end
 			end
+		else
+			local sourcecolor, sourcename = ZE2.GetMobjNameAndColor(source)
+			if inflictor and inflictor.valid and ((inflictor ~= source) or (inflictor.target and inflictor.target.valid)) then
+				local theircolor, theirname = ZE2.GetMobjNameAndColor(inflictor)
+				if (theirname:len() > 0) then -- valid name
+					sourcename = sourcecolor .. sourcename .. "\x83" .. "'s " .. theircolor .. theirname
+				end
+			end
+			message = string.format("%s%s%s has been infected by %s%s", playercolor, player.name, "\x83", sourcecolor, sourcename)
 		end
-		message = string.format("%s%s%s has been infected by %s%s", playercolor, player.name, "\x83", sourcecolor, sourcename)
 	else
 		message = string.format("%s%s%s has been infected", playercolor, player.name, "\x83")
 	end
