@@ -14,8 +14,17 @@ local item_blacklist = {
 
 -- TODO(?): Maybe each new entry added through modding could have a metatable applied to it
 --			so we can be sure there are no "holes" in them? Maybe `newentry.__index = ZE2.SurvivorConfig["default"]`
-ZE2.ZombieConfig = {
-	["normal"] = {
+ZE2.registered_zombies = {}
+ZE2.ZombieConfig = {}
+
+function ZE2.AddZombie(zombiename, input_table)
+	ZE2.ZombieConfig[zombiename] = input_table
+	table.insert(ZE2.registered_zombies, zombiename)
+	ZE2.blacklist_skin(input_table.skin)
+	print("Added zombie config: ".. zombiename)
+end
+
+ZE2.AddZombie("normal", {
 		name = "Beta",
 		skin = "zsonic",
 		skincolor = SKINCOLOR_ZOMBIE,
@@ -40,8 +49,10 @@ ZE2.ZombieConfig = {
 			sound = sfx, (maybe make an ontrigger func?)
 			*/
 		}
-	},
-	["alpha"] = {
+	}
+)
+
+ZE2.AddZombie("alpha", {
 		name = "Alpha",
 		skin = "zsonic",
 		skincolor = SKINCOLOR_ALPHAZOMBIE,
@@ -58,6 +69,7 @@ ZE2.ZombieConfig = {
 			"fist";
 			"blood_bomb"; 
 		},
+		--infection_transform = true, -- if true, it would transform infected players with this zombie type by a zombie player of the same type
 		special = {
 			button = BT_CUSTOM2,
 			effect = "alphazombie.rage",
@@ -72,8 +84,8 @@ ZE2.ZombieConfig = {
 			cooldown = 50*TICRATE,
 			sound = sfx_bstup,
 		}
-	},
-}
+	}
+)
 
 ZE2.SurvivorConfig = {}
 

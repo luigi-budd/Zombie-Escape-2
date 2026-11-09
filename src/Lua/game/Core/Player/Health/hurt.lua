@@ -34,9 +34,17 @@ function xSlinger.KillMobj(mo, inf, src, damagetype)
 
 		if (team == 1) then -- victim is survivor
 			if killer and killer.valid then
+				ZE2.SendInfectionMessage(player, (inf == killer) and src or inf, killer)
 				if ZE2.cv_instantinfection.value then
 					killing = false
-					ZE2.ZombifyPlayer(player)
+
+					local new_type
+					local killer_ztype = killer.player.ze2.zombie_type
+					if ZE2.ZombieConfig[killer_ztype] and ZE2.ZombieConfig[killer_ztype].infection_transform then
+						new_type = killer_ztype
+					end
+
+					ZE2.ZombifyPlayer(player, new_type)
 					ZE2.PlayZombieSound(player, true)
 				end
 
@@ -52,7 +60,6 @@ function xSlinger.KillMobj(mo, inf, src, damagetype)
 				ZE2.dropSurvivorInventory(player)
 
 				killer.player.ze2.cash = killer.player.ze2.cash + cash_award
-				ZE2.SendInfectionMessage(player, (inf == killer) and src or inf, killer)
 				CONS_Printf(killer.player, "\x83" .. "+ $" .. cash_award .. " cash gained from infecting a survivor!")
 				S_StartSound(killer.player.mo, sfx_rbyhit)
 			end
@@ -71,7 +78,8 @@ function xSlinger.KillMobj(mo, inf, src, damagetype)
 			local dmgtaken = player.ze2.damagefromplayer
 			local dmgreq = (mo.maxhealth*7)/10
 			if dmgtaken > dmgreq then
-				player.ze2.next_zombie_type = "alpha"
+				local next_zombie_type = "alpha"
+				player.ze2.next_zombie_type = next_zombie_type
 			end
 		end
 	end

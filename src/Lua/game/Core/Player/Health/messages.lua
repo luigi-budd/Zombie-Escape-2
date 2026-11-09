@@ -11,6 +11,7 @@ local function GetAssistant(player, attacker)
 		local data = pV.recent_attackers[index]
 		if (leveltime > data.time) then continue end
 		if (attacker == data.source) then continue end
+		if (attacker.team == player.mo.team) then continue end
 		return data.source
 	end
 	return
@@ -61,10 +62,7 @@ local DEATH_TYPES = {
 	[DMG_DROWNED] = "%s%s%s drowned",
 	[DMG_SPACEDROWN] = "%s%s%s couldn't breathe",
 	[DMG_DEATHPIT] = "%s%s%s fell into a bottomless pit",
-	[DMG_CRUSHED] = "%s%s%s was crushed",
-
-	[DMG_SPECTATOR] = "%s%s%s went AWOL",
-	[DMG_INSTAKILL] = "%s%s%s has been killed by " .. "\x8F" .. "Something"
+	[DMG_CRUSHED] = "%s%s%s was crushed"
 }
 
 ---@param assist mobj_t
@@ -185,7 +183,7 @@ end
 ---@param source mobj_t
 function ZE2.SendInfectionMessage(player, inflictor, source)
 	local message = ""
-	local playercolor = "\x84"
+	local playercolor = (player.mo.team == 1) and "\x84" or "\x85"
 	if source and source.valid and source.player and source.player.valid then
 		if (source.player == player) then -- this is imposible to get but, would be funny
 			message = string.format("%s%s%s has been infected by themselves", playercolor, player.name, "\x83")
@@ -197,6 +195,11 @@ function ZE2.SendInfectionMessage(player, inflictor, source)
 				end
 			end
 		else
+			local placeholder = "%s%s%s has been infected by %s%s"
+			if (source.team == player.mo.team) then
+				placeholder = "%s%s%s has been betrayed and infected by %s%s"
+			end
+
 			local sourcecolor, sourcename = ZE2.GetMobjNameAndColor(source)
 			if inflictor and inflictor.valid and ((inflictor ~= source) or (inflictor.target and inflictor.target.valid)) then
 				local theircolor, theirname = ZE2.GetMobjNameAndColor(inflictor)
@@ -204,7 +207,7 @@ function ZE2.SendInfectionMessage(player, inflictor, source)
 					sourcename = sourcecolor .. sourcename .. "\x83" .. "'s " .. theircolor .. theirname
 				end
 			end
-			message = string.format("%s%s%s has been infected by %s%s", playercolor, player.name, "\x83", sourcecolor, sourcename)
+			message = string.format(placeholder, playercolor, player.name, "\x83", sourcecolor, sourcename)
 		end
 	else
 		message = string.format("%s%s%s has been infected", playercolor, player.name, "\x83")
